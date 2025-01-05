@@ -1,5 +1,3 @@
-local tsquery = require("vim.treesitter.query")
-
 local M = {}
 
 local function sanitised(test_name)
@@ -20,14 +18,14 @@ function M.test_class()
 	local ft = vim.api.nvim_buf_get_option(0, "filetype")
 	assert(ft == "kotlin", "dap-go error: can only debug go files, not " .. ft)
 
-	local test_query = vim.treesitter.parse_query(ft, query)
+	local test_query = vim.treesitter.query.parse(ft, query)
 	assert(test_query, "dap-go error: could not parse test query")
 
 	for _, match, _ in test_query:iter_matches(root, 0, 0, stop_row) do
 		for id, node in pairs(match) do
 			local capture = test_query.captures[id]
 			if capture == "cname" then
-				closest_name = tsquery.get_node_text(node, 0)
+				closest_name = vim.treesitter.get_node_text(node, 0)
 			end
 		end
 	end
@@ -51,7 +49,7 @@ function M.closest_test()
 	local ft = vim.api.nvim_buf_get_option(0, "filetype")
 	assert(ft == "kotlin", "dap-go error: can only debug go files, not " .. ft)
 
-	local test_query = vim.treesitter.parse_query(ft, tests_query)
+	local test_query = vim.treesitter.query.parse(ft, tests_query)
 	assert(test_query, "dap-go error: could not parse test query")
 
 	for _, match, _ in test_query:iter_matches(root, 0, 0, stop_row) do
@@ -59,11 +57,11 @@ function M.closest_test()
 		for id, node in pairs(match) do
 			local capture = test_query.captures[id]
 			if capture == "mod" then
-				local name = tsquery.get_node_text(node, 0)
+				local name = vim.treesitter.get_node_text(node, 0)
 				test_match.modifier = name
 			end
 			if capture == "fname" then
-				test_match.function_name = tsquery.get_node_text(node, 0)
+				test_match.function_name = vim.treesitter.get_node_text(node, 0)
 			end
 		end
 		table.insert(Debug_test_tree, test_match)
